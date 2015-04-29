@@ -23,7 +23,7 @@ The hyphen in the chart indicates the user hasn’t rated that item. So when we 
 
 
 > ####What do you think?
-> I imagine some of you were reading along, encountered the table,  glanced it it thinking “yep, a table, artists, people, some ratings” and then continued reading. That’s fine. I skim things all the time. But to get a deep understanding of the task we need to pause and engage our brain. That’s a picture of our friend Jake there on the right and we truly want to recommend something to him. Take another look at that table and see what you would recommend to him. It may help to write your answers down on a piece of paper--further engaging your brain.
+> I imagine some of you were reading along, encountered the table,  glanced it it thinking “yep, a table, artists, people, some ratings” and then continued reading. That’s fine. I skim things all the time. But to get a deep understanding of the task we need to pause and engage our brain. Suppose we truly want to recommend something to Jake. Take another look at that table and see what you would recommend to him. It may help to write your answers down on a piece of paper--further engaging your brain.
 
 
 
@@ -38,7 +38,7 @@ For this small data set we can do the job pretty well by hand--we can just eyeba
 ![Alt text](http://guidetodatamining.com/markdownPics/programming2.png)
  We have the common problem of scalability.  The popularity of our web app took off and now we have tens of thousands of users and information on tens of thousands of musical artists. We can no longer store the data on a single machine so we need to distribute the data across a cluster of computers. With this amount of data, running our home-built recommendation software on a single machine is too slow.   So now we are faced with the daunting task of writing a distributed application that accesses a distributed data set and you need to handle synchronization among all these components. Eeeks. 
  
-
+Fortunately, here is where predictionIO comes in.
 Before diving too deeply into predictionIO let’s get our hands dirty and see how we can implement the above recommendation task in it.
 
 ### Preliminary steps
@@ -46,7 +46,7 @@ Before diving too deeply into predictionIO let’s get our hands dirty and see h
 Before we start developing our recommendation system we need to install the predictionIO stack of software. There are a number of installation options:
 
 * If you have a Mac or Linux machine, you can install PredictionIO directly on your machine.
-* You can use an Amazon AWS EC2 instance.
+* You can use a cloud server from Digital Ocean,  Amazon, Linode, or other providers.
 * You can use a terminal.com snapshot image
 * You can install it on your Windows, Mac, or Linux machine under Vagrant (so PredictionIO is running in a virtual machine).
 * You can install it in a Docker Container and run it locally.
@@ -59,26 +59,78 @@ If you just want to explore PredictionIO I would not install it directly on a Ma
 Suppose I want to install the Moses Statistical Machine Translation Toolkit on a Linux machine. I run into install problems which I can’t decipher. I google for an hour and discover that I have version 5.1 of some tool and the Moses installer assumes I have version 4.3. Or it does install but I am getting errors due to some subtle difference between my machine and the ones the Moses developers use. Installing software in a virtual machine under Vagrant or Docker drastically reduces the likelihood of these inconsistencies.   
 
 #### Hassle 2
-The other hassle is if I install something, Moses say, and decide it isn’t for me, I would like to delete every bit of it from my system and return the system back to its pre-Moses state. With software with multiple components that is sometimes hard to do.  If I installed software using a vagrant box (a virtual machine) or Docker container  I can simply delete the virtual machine and my laptop is back to its pristine state. both those problems go away. 
+The other hassle is if I install something, Moses say, and decide it isn’t for me, I would like to delete every bit of it from my system and return the system back to its pre-Moses state. With software with multiple components that is sometimes hard to do.  If I installed software using a vagrant box (a virtual machine) or Docker container  I can simply delete the virtual machine and my laptop is back to its pristine state. 
+
+With Vagrant, Docker, or a cloud server, both those problems go away. 
  Again, these are my opinions. If you have a Mac or Linux machine with less than 8GB you could install it directly.
 The predictionIO website contains detailed instructions for installing the software in a variety of contexts on the page http://docs.prediction.io/install/
 
-##### ADD A PAGE OR TWO OF INSTALL METHODS
+##### Quick Install
+Whether you are running on a cloud server like Linode or Digital Ocean, or on a Vagrant box on your laptop the process is the same. Once you bring up a machine and ssh into it you simply type:
+
+     vagrant:~$ bash -c "$(curl -s https://install.prediction.io/install.sh)"
+
+all on one line (starting with the word *bash*).  Once you enter this you will be asked several questions. For these questions, you can just use their default values:
+
+     Welcome to PredictionIO 0.9.2!
+     Linux OS detected!
+     Using user: root
+     Where would you like to install PredictionIO?
+     Installation path (/root/PredictionIO): 
+     Vendor path (/root/PredictionIO/vendors): 
+     Recieve updates? [Y/n] n
+     --------------------------------------------------------
+     OK, looks good!
+     You are going to install PredictionIO to: /root/PredictionIO
+
+Typically this takes a few minutes to complete. 
+
+Once that is done you will have a `PredictionIO` directory and within that directory is a directory called `bin` that contains all the executables. As you can see above my installation path was `/root/PredictionIO` so the path to the `bin` directory is `/root/PredictionIO/bin`. If you are using Linux, you will need to add this path to your PATH environment variable. Here are the instructions to do so. First, I am going to make sure I am in my home directory by typing `cd` (change directory) without an argument:
+     cd
+     
+Now, I will get a listing of all my files in my home directory
+
+     ls -a
+     .  ..  .bash_logout  .bashrc  .cache  .profile  .ssh
+     
+Great. Now I am going to edit that .bashrc file. Open it up in your favorite editor. Check to see if there is a line in the file that contains the word PATH, something like:
+     export PATH=$PATH:/root/moses/bin:/root/bin
+
+If you don't see a line like this add the following line of the file:
+
+          export PATH=$PATH:/root/PredictionIO/bin/
+          
+(Replace `/root/PredictionIO/bin/` with your path.)
+
+If there is a pre-existing path line add `/root/PredictionIO/bin/` to the end of that line:
+     export PATH=$PATH:/root/moses/bin:/root/bin:/root/PredictionIO/bin/
+
+
+Go ahead and save the file and then, from the terminal, source that file:
+
+     source .bashrc
+     
 
 ####Step ii starting the event server
-PredictionIO is not a monolithic humongous application. Rather, it is a collection of specialized servers and other applications.  One such specialized server is what PredictionIO calls the Event Server.  In our “leap before understanding what’s going on” approach that we’ve been using, let’s start that server and then we will figure out what it does.
-To start the eventserver, type the following in a terminal window:
+PredictionIO is not a monolithic humongous application. Rather, it is a collection of specialized servers and other applications.  We can start all those servers by typing the following in a terminal window:
 
 ```
-pio eventserver --ip 0.0.0.0 &
+pio-start-all
 ```
 
-The Event Server is the PredictionIO component that imports and manages data. We will be looking at the Event Server in more detail.  For now let’s continue focusing on building our music recommendation system. 
+And we can check that everything is working correctly by typing `pio status` 
 
-> That’s it for the preliminary steps. We got the software installed and started the event server!
+     pio status
+     PredictionIO
+     Installed at: /root/PredictionIO
+     Version: 0.9.2
+     Your system is all ready to go.
+
+
+> That’s it for the preliminary steps. We got the software installed and started!
 
 ####step 1. generating an app ID and Access Key.
-The Event Server might be storing data from a variety of sources and for a variety of applications. In this sense it is similar to a database server. A single database server can store numerous databases and each database can be tied to a unique application.  The Event Server is similar [change word] For example, the server might be storing information related to our music recommendation system, and also storing data related to an entirely different project. When we store data in the Event Server we want it to keep track of where that data came from and how it will be used. We want to say something like “Hey, here’s some data and remember it came from me, the music recommendation web app.” To make this connection we are going to generate a unique 64 byte Access Key by using the command pio app new:
+One of the PredictionIO components we started in the previous step was the Event Server, which imports and manages data. The Event Server might be storing data from a variety of sources and for a variety of applications. In this sense it resembles a database server. A single database server can store numerous databases and each database can be tied to a unique application.  The Event Server is similar. For example, the server might be storing information related to our music recommendation system, and also storing data related to an entirely different project. When we store data in the Event Server we want it to keep track of where that data came from and how it will be used. We want to say something like “Hey, here’s some data and remember it came from me, the music recommendation web app.” To make this connection we are going to generate a unique 64 byte Access Key by using the command pio app new:
 
 ```
 vagrant~$ pio app new MusicApp
