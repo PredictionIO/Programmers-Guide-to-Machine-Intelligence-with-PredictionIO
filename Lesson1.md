@@ -1,6 +1,6 @@
 ###Lesson 1: Getting Started with PredictionIO
 # a recommender
-#### very rough draft - just testing markdown
+#### first full draft 
 
 
 Suppose we want to develop a web app the recommends musical groups to people. People rate the artists they like on a scale of 1 to 5 (5 being they really like them) and based on these ratings our system will make a recommendation.  Let’s say we have a small dataset that looks like this.
@@ -10,11 +10,11 @@ Suppose we want to develop a web app the recommends musical groups to people. Pe
 |Taylor Swift	| 5	| - 	| 5	| 2	| - |
 |Miranda Lambert |	- |	-	| 5 |	2 | 	- |
 | Brad Paisley	| 5	| - |	5	| 1	| 1 |
-| Purity Ringl |	- |	-	| -	 | 4	| 4 |
+| Purity Ring |	- |	-	| -	 | 4	| 4 |
 |Father John Misty |	3 |	5 |	3 | 	-	| 5 |
 |Nicki Minaj |	-	| - | 	1	| 4 |	5 |
 | Ed Sheeran	| 3 |	3	| 3 | 	- |	- |
-| Ariana Grande |  	- |	- |	-	| 5 |	- |
+| Ariana Grande |  	- |	5 |	-	| 5 |	- |
 | Flying Lotus |	-	| 4	| - | 3 | 	- |
 | Thundercat |	1	| 4	| - | -	 |1 |
 
@@ -94,6 +94,7 @@ Now, I will get a listing of all my files in my home directory
      .  ..  .bash_logout  .bashrc  .cache  .profile  .ssh
      
 Great. Now I am going to edit that .bashrc file. Open it up in your favorite editor. Check to see if there is a line in the file that contains the word PATH, something like:
+
      export PATH=$PATH:/root/moses/bin:/root/bin
 
 If you don't see a line like this add the following line of the file:
@@ -103,6 +104,7 @@ If you don't see a line like this add the following line of the file:
 (Replace `/root/PredictionIO/bin/` with your path.)
 
 If there is a pre-existing path line add `/root/PredictionIO/bin/` to the end of that line:
+
      export PATH=$PATH:/root/moses/bin:/root/bin:/root/PredictionIO/bin/
 
 
@@ -111,7 +113,7 @@ Go ahead and save the file and then, from the terminal, source that file:
      source .bashrc
      
 
-####Step ii starting the event server
+####Step ii starting the server stack
 PredictionIO is not a monolithic humongous application. Rather, it is a collection of specialized servers and other applications.  We can start all those servers by typing the following in a terminal window:
 
 ```
@@ -126,10 +128,14 @@ And we can check that everything is working correctly by typing `pio status` 
      Version: 0.9.2
      Your system is all ready to go.
 
+We also need to start the event server:
 
+     pio eventserver
+     
 > That’s it for the preliminary steps. We got the software installed and started!
 
-####step 1. generating an app ID and Access Key.
+
+####step 1. generating an  Access Key.
 One of the PredictionIO components we started in the previous step was the Event Server, which imports and manages data. The Event Server might be storing data from a variety of sources and for a variety of applications. In this sense it resembles a database server. A single database server can store numerous databases and each database can be tied to a unique application.  The Event Server is similar. For example, the server might be storing information related to our music recommendation system, and also storing data related to an entirely different project. When we store data in the Event Server we want it to keep track of where that data came from and how it will be used. We want to say something like “Hey, here’s some data and remember it came from me, the music recommendation web app.” To make this connection we are going to generate a unique 64 byte Access Key by using the command pio app new:
 
 ```
@@ -144,7 +150,7 @@ vagrant~$ pio app new MusicApp
 ```
 
 
-Here we instruction pio (PredictionIO) to make a new app named “MusicApp” and pio generates and prints out the access key and an id (we will use the id shortly).
+Here we instruction pio (PredictionIO) to make a new app named “MusicApp” and pio generates and prints out both the name of the app and the access key  (we will use the id shortly).
 
 #### step 2. importing data
 PredictionIO uses the term event to refer to one piece of data. For example, Jake giving a rating of 5 to Taylor Swift is an event. The type of the event is a rating--user Jake is giving an item, Taylor Swift, a rating of 5. The specific format of the event is
@@ -163,7 +169,7 @@ PredictionIO uses the term event to refer to one piece of data. For example, Jak
 There are a number of ways to connect to the Event Server and transmit events. For Python, which we will use here, there is a module for predictionIO that provides an interface to the Event Server.  The first thing we need to do is install this module using the Python package manager, pip:
 
 ```
-vagrant~$ pip install predictionio
+vagrant~$ sudo pip install predictionio
 ```
 
 If, when you try this you get the error: 
@@ -172,42 +178,46 @@ If, when you try this you get the error: 
 The program 'pip' is currently not installed. To run 'pip' please ask your administrator to install the package 'python-pip'
 ```
 
-The program 'pip' is currently not installed. To run 'pip' please ask your administrator to install the package 'python-pip'you can install pip by executing:
+you can install pip by executing:
 ```
 vagrant~$ sudo apt-get install python-pip
 ```
 
-and then rerunning pip install predictionio. 
-Okay, back to our task of importing data to the Event Server using Python. First, we represent our music recommendation data shown in the table above in the text file shown below:  FIX XXX
+and then rerunning `sudo pip install predictionio`. 
 
->Jake,Taylor Swift,5
+Okay, back to our task of importing data to the Event Server using Python. First, we represent our music recommendation data shown in the table above in the text file shown below: 
+
+
+```
+Jake,Taylor Swift,5
 Jake,Brad Paisley, 5
-Jake,Guardians of the Galaxy Awesome Mix Vol. 1,3
+Jake,Father John Misty,3
 Jake,Ed Sheeran,3
-Jake,Panda Bear,1
-Clara,Guardians of the Galaxy Awesome Mix Vol. 1,5
+Jake,Thundercat,1
+Clara,Father John Misty,5
 Clara,Ed Sheeran,3
-Clara,New Basement Tapes,4
-Clara,Panda Bear, 4
+Clara,Flying Lotus,4
+Clara,Thundercat, 4
 Clara,Ariana Grande,5
 Kelsey,Taylor Swift,5
 Kelsey,Miranda Lambert,5
 Kelsey,Brad Paisley, 5
 Kelsey,Nicki Minaj,1
-Kelsey,Guardians of the Galaxy Awesome Mix Vol. 1,3
+Kelsey,Father John Misty,3
 Kelsey,Ed Sheeran,3
 Angelina,Taylor Swift,2
 Angelina,Miranda Lambert,2
 Angelina,Brad Paisley, 1
-Angelina,Baby Metal, 4
+Angelina,Purity Ring, 4
 Angelina,Nicki Minaj,4
 Angelina,Ariana Grande,5
-Angelina,New Basement Tapes,3
+Angelina,Flying Lotus,3
 Jorydyn,Brad Paisley,1
-Jordyn,Baby Metal, 4
-Jordyn,Guardians of the Galaxy Awesome Mix Vol. 1,5
+Jordyn,Purity Ring, 4
+Jordyn,Father John Misty,5
 Jordyn,Nicki Minaj,5
-Jordyn,Panda Bear,1
+Jordyn,Thundercat,1
+```
 
 > This data file as well as the Python code on the following page are  available at.. http://XXXXXXXX
 
@@ -251,6 +261,7 @@ As you can see, this code opens the data file. It then iterates through each lin
 Jake,Taylor Swift,5
 ```
 Previously we saw that the Event Server can import data that is in the following format:
+
 ```
 {
   "event" : "rate",
@@ -259,13 +270,13 @@ Previously we saw that the Event Server can import data that is in the following
   "targetEntityType" : "item",
   "targetEntityId" : "Taylor Swift",
   "properties" : { "rating" : 5.0  }}
-
 ```
+
 The Python code converts a line from the data file to this format before passing it to create_event which adds the data to the Event Server. 
 Running this code will import the events (data) into the Event Server:
 
 ```
-vagrant $ python data/import3.py 
+python import.py 
 
 28 events are imported.
 
@@ -273,11 +284,17 @@ vagrant $ python data/import3.py
 
 ![Alt text](http://guidetodatamining.com/markdownPics/programming3.png)
 
+
 We can go to a browser window and enter the url:
-http://localhost:7070/events.json?accessKey=<our access key>
+
+     http://localhost:7070/events.json?accessKey=<our access key>
+
 So, with the access key we have been using above:
-http://localhost:7070/events.json?accessKey=Kx1GhBg8b5PUVbg7Zicv4RWHqEeUNnU3iz1EBIRqMfvjjSycGUjv3XOY2GT21AwE
+
+     http://localhost:7070/events.json?accessKey=Kx1GhBg8b5PUVbg7Zicv4RWHqEeUNnU3iz1EBIRqMfvjjSycGUjv3XOY2GT21AwE
+
 and our imported data will be displayed:
+
 ![Alt text](http://guidetodatamining.com/markdownPics/screenshot1.png)
 
 (sorry for that tiny print). Anyway, it looks like we’ve been successful importing the data.
@@ -314,7 +331,7 @@ vagrant:/vagrant$ cd MusicRecommender
 vagrant:/vagrant/MusicRecommender$ ls
 build.sbt  data  engine.json  manifest.json  pio.log  project  src  target
 ```
-In step 2 we generated an app id and an access key. In that step’s example, the app id was 1. If we didn’t write that down and can’t remember, we can always find the app id and access key by asking PredictionIO to list the apps: 
+In step 2 we generated an app name and an access key. In that step’s example, the app name was MusicApp. If we didn’t write that down and can’t remember, we can always find the app name and access key by asking PredictionIO to list the apps: 
 
 ```
 vagrant@vagrant-ubuntu-trusty-64:/vagrant$ pio app list
@@ -329,8 +346,8 @@ vagrant@vagrant-ubuntu-trusty-64:/vagrant$ pio app list
 
 >[note] in this example I have elided some information (for example, I shortened the access keys) to make the example more legible while keeping a reasonable font size)
 
-Great. So it is the case that the id for our MusicApp is 1. We need to make sure the engine we just created is tied to this app (in our case app id 1). 
-To do this we need to edit the engine.json file in the musicRecommender directory so the app  ids match: 
+Great. Now we need to make sure the engine we just created is tied to this app. 
+To do this we need to edit the engine.json file in the musicRecommender directory so the app  names match: 
 
 ```
 {
@@ -339,16 +356,28 @@ To do this we need to edit the engine.json file in the musicRecommender director
   "engineFactory": "org.zacharski.RecommendationEngine",
   "datasource": {
     "params" : {
-      "appId": 1
+      "appName": "MusicApp"
     }
   },
+  "algorithms": [
+    {
+      "name": "als",
+      "params": {
+        "rank": 10,
+        "numIterations": 20,
+        "lambda": 0.01,
+        "seed": 3
+      }
+    }
+  ]
+}
 ```
 
 ####step 5. building the engine
 Once you edit that file and save it, we can build the engine:
 
 ```
-vagrant:/vagrant$ pio build
+$ pio build
 
 ```
 
@@ -359,6 +388,10 @@ This takes about 5 minutes in a vagrant box on my Mac Desktop. Other than taking
 > If you get the error:
 > 2015-03-06 19:44:52,324 ERROR tools.Console$ - Return code of previous step is 1. Aborting.
 >   make sure you are in the musicRecommender directory when you execute pio build.
+>   
+>   **Memory Error** If you are getting an error try running the build command  in verbose mode: `pio build --verbose`
+>   If you see the error: 
+>   `Native memory allocation (malloc) failed to allocate 715849728 bytes for committing reserved memory.` you will need to allocate more memory to your virtual machine or use a larger instance of a cloud server.
 
 Now that it is accomplished we can finally train the recommender. 
 
@@ -383,7 +416,7 @@ Remember our original table of data? 
 Training involves creating a system that will replace those unknown values (the hyphens) with good predictions of how that user would rate the artist. By default the recommendation engine uses a method called matrix factorization, which we will learn about in chapter 3. The basic idea is that the training starts by the engine building a recommendation system based on random values. Obviously, it will perform very poorly. Then we will run this recommendation system on our data and see how well it predicts our known values. For example, how well did it predict Jake would give a 5 to Taylor Swift. Let’s say the system predicted Jake would give Taylor Swift a 3. In that case we would adjust the parameters to increase the Jake-Taylor  Swift rating (and account for other mis-predictions). Now we have a second generation of our recommendation engine and we again evaluate it on our data and adjust the parameters. We will do this perhaps 1,000 times until our recommender is precise in predicting the known values. Now we can use this recommender to fill in those missing values.  Let’s go ahead and train our engine.
 
 ```
-vagrant:/vagrant/MusicRecommender$ pio train
+$ pio train
 2015-03-03 21:51:33,577 INFO  tools.Console$ - Using existing engine manifest JSON at /vagrant/MusicRecommender/manifest.json
 ...
 2015-03-03 21:52:02,754 INFO  workflow.CoreWorkflow$ - CoreWorkflow.run completed.
@@ -438,11 +471,11 @@ What artist would you recommend to Jake?  
 
 
 
-Here’s my thinking. Jake looks similar to Kelsey. Both Jake and Kelsey gave a 5 to Taylor Swift and Brad Paisley and a 3 to Guardians of the Galaxy and Ed Sheeran. So I think Jake probably like what Kelsey likes. Kelsey gave Miranda Lambert a 5 so Jake would probably do so too. So I would recommend Miranda Lambert to Jake.
+Here’s my thinking. Jake looks similar to Kelsey. Both Jake and Kelsey gave a 5 to Taylor Swift and Brad Paisley and a 3 to Father John Misty and Ed Sheeran. So I think Jake probably like what Kelsey likes. Kelsey gave Miranda Lambert a 5 so Jake would probably do so too. So I would recommend Miranda Lambert to Jake.
 While we are at it let’s come up with a recommendation for Jordyn.  
 
 Jordyn is most similar to Angelica and Angelica gave a 5 to Ariana Grande so that would be a good recommendation for Jordyn.
-Those are the human recommendations. Let’s check out the machine.
+Those are the human recommendations. Let’s check out the machine's.
 
 On the left are Jake’s original ratings and again, we think Jake would give a 5 to Miranda Lambert so we recommend that to him. 
 To ask our recommendation system let’s use curl, 
@@ -461,33 +494,34 @@ This query asks for the 4 highest rated items for Jake. Let’s put this togethe
 Lungta:~ raz$ curl -H "Content-Type: application/json" -d '{ "user": "Jake", "num": 10 }' http://localhost:8000/queries.json
 
 {"itemScores":
-[{"item":"Taylor Swift","score":4.997968289493851},    {"item":"Brad Paisley","score":4.992076869666511},
- {"item":"Miranda Lambert","score":4.882315027430614},
- {"item":"Guardians of the Galaxy Awesome Mix Vol. 1","score":  
-  3.0009464062894144},
- {"item":"Ed Sheeran","score":2.988141238862262},
- {"item":"Ariana Grande","score":1.8154660104862221},
- {"item":"Baby Metal","score":1.4449050788629214},
- {"item":"New Basement Tapes","score":1.3243822061813184}, 
- {"item":"Nicki Minaj","score":1.0554909771692242},
- {"item":"Panda Bear","score":1.005113459149016}]
+[{"item":"Taylor Swift","score":5.003524672696106},
+ {"item":"Brad Paisley","score":4.9863405658166755},
+ {"item":"Miranda Lambert","score":4.947602800665003},
+ {"item":"Father John Misty","score":3.0001297931496054},
+ {"item":"Ed Sheeran","score":2.986463101198867},
+ {"item":"Ariana Grande","score":1.4607684989869723},
+ {"item":"Purity Ring","score":1.4068783622405703},
+ {"item":"Flying Lotus","score":1.1086401155546297},
+ {"item":"Nicki Minaj","score":1.0989413500212586}, 
+ {"item":"Thundercat","score":1.0078739247868034}]
+
 ```
 
  Let’s compare these predicted ratings to Jake’s original ratings:
 
 | - | Actual | Predicted |
 |--:|--:|--:|
-|Taylor Swift | 5 | 4.998 |
-|Brad Paisley | ? | 4.882 |
-| Purity Ring | ? | 1.445 |
-| Father John Misty | 3 | 2.988 |
-| Nicki Minaj | ? | 1.055 |
+|Taylor Swift | 5 | 5.003 |
+|Brad Paisley |5 | 4.986 |
+| Purity Ring | ? | 1.407 |
+| Father John Misty | 3 | 3.000 |
+| Nicki Minaj | ? | 1.099 |
 | Ed Sheeran | 3 | 2.988 |
-| Ariana Grande | ? | 1.815 |
-| Flying Lotus | ? | 1.324 |
-| Thundercat | 1 | 1.005 |
+| Ariana Grande | ? | 1.461 |
+| Flying Lotus | ? | 1.109 |
+| Thundercat | 1 | 1.008 |
 
-Wow. That looks pretty good. Jake gave Taylor Swift a 5 and the recommender predicted a 4.998. Jake gave Brad Paisley a 5 and the recommender predicted a 4.992. But really, this isn’t that surprising. After all, we trained our recommendation system on this data. It would be more a surprise if the predicted ratings significantly differed from Jake’s true ratings. More interesting is what the recommender predicted for artists Jake didn’t rate--and perhaps never heard. It predicts that Jake should like Miranda Lambert and this matches our expectations-- We thought Jake would like Miranda Lambert. And that is pretty much all Jake will like from our short list of artists.
+Wow. That looks pretty good. Jake gave Taylor Swift a 5 and the recommender predicted a 5.003 Jake gave Brad Paisley a 5 and the recommender predicted a 4.986. But really, this isn’t that surprising. After all, we trained our recommendation system on this data. It would be more a surprise if the predicted ratings significantly differed from Jake’s true ratings. More interesting is what the recommender predicted for artists Jake didn’t rate--and perhaps never heard. It predicts that Jake should like Miranda Lambert and this matches our expectations-- We thought Jake would like Miranda Lambert. And that is pretty much all Jake will like from our short list of artists.
 
 > ####You try
 > Can you query our recommender to get the predicted values for Jordyn and fill in the following table?
