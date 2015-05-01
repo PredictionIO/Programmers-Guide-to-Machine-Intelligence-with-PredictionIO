@@ -1,4 +1,4 @@
-###Lesson 1: Getting Started with PredictionIO
+###1: Getting Started with PredictionIO
 # a recommender
 #### first full draft 
 
@@ -32,10 +32,12 @@ The hyphen in the chart indicates the user hasn’t rated that item. So when we 
 
 
 
-For this small data set we can do the job pretty well by hand--we can just eyeball the table and make our recommendations quickly. Great. So we develop a web app that lets people rate artists. We hire a guy who looks at a user’s ratings, consults the above table and makes recommendations. Sounds like a great business plan. But suppose we have lots more data. Instead of ten artists we have thousands and instead of five users we have five hundred. And suppose the data is constantly changing--users are regularly entering new ratings. Here the guy-in-the-back-room approach won’t scale and we look to automate the process. We can task a developer to write a recommendation system from scratch by hand, or we can turn to a pre-existing open-source solution like PredictionIO. 
+For this small data set we can do the job pretty well by hand--we can just eyeball the table and make our recommendations quickly. Great. So we develop a web app that lets people rate artists. We hire a guy who looks at a user’s ratings, consults the above table and makes recommendations. Sounds like a great business plan. But suppose we have lots more data. Instead of ten artists we have thousands and instead of five users we have five hundred. And suppose the data is constantly changing--users are regularly entering new ratings. Here the guy-in-the-back-room approach won’t scale and we look to automate the process. We can task a developer to write a recommendation system from scratch by hand, or we can turn to a pre-existing open-source solution like PredictionIO. [^fn-pic1-citations]
 
-![Alt text](http://guidetodatamining.com/markdownPics/programming1.png)
-![Alt text](http://guidetodatamining.com/markdownPics/programming2.png)
+[^fn-pic1-citations]: All the pictures have a Creative Commons CC-BY-SA license. [The picture of the man](http://farm3.staticflickr.com/2266/2154073573_93da3d519c_z.jpg) is from David Goehring. The picture of [the woman coding](https://www.flickr.com/photos/binary_koala/2601745524/sizes/l/) and of [her frustrated](http://www.flickr.com/photos/binary_koala/765636406) are from Binary Koala.
+
+![Alt text](http://guidetodatamining.com/markdownPics/programming1b.png)
+![Alt text](http://guidetodatamining.com/markdownPics/programming2b.png)
  We have the common problem of scalability.  The popularity of our web app took off and now we have tens of thousands of users and information on tens of thousands of musical artists. We can no longer store the data on a single machine so we need to distribute the data across a cluster of computers. With this amount of data, running our home-built recommendation software on a single machine is too slow.   So now we are faced with the daunting task of writing a distributed application that accesses a distributed data set and you need to handle synchronization among all these components. Eeeks. 
  
 Fortunately, here is where predictionIO comes in.
@@ -273,7 +275,9 @@ Previously we saw that the Event Server can import data that is in the following
 ```
 
 The Python code converts a line from the data file to this format before passing it to create_event which adds the data to the Event Server. 
-Running this code will import the events (data) into the Event Server:
+Running this code will import the events (data) into the Event Server: [^fn-pic2-citations]
+
+[^fn-pic2-citations]: [The following picture](https://www.flickr.com/photos/binary_koala/1658713499/) by Binary Koala has a Creative Commons CC-BY-SA license. 
 
 ```
 python import.py 
@@ -282,7 +286,7 @@ python import.py
 
 ```
 
-![Alt text](http://guidetodatamining.com/markdownPics/programming3.png)
+![Alt text](http://guidetodatamining.com/markdownPics/programming3b.png)
 
 
 We can go to a browser window and enter the url:
