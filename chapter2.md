@@ -74,7 +74,7 @@ Suppose Jake comes into the store,  has never heard of Miranda Lambert, and we a
 
 $$5 \times 0.98 = 4.9$$
 
-We do the same for the PBR&B numbers and add them together to get Jake's rating of Miranda Lambert.
+We do the same for the PBR&B numbers and add them together to get our estimate of Jake's rating of Miranda Lambert.
 
 $$rating_{Jake,Miranda} =  5 \times 0.98 + 1 \times 0.05 = 4.9 + 0.05 = 4.95$$
 
@@ -86,17 +86,17 @@ $$rating_{a,ts} = 0 \times  0.9 + 5 \times .05 = 0.25$$
 $$rating_{a,ja} = 0 \times 0.01  + 5 \times  0.99 = 4.95$$
 
 ####a slight change
-Let's change this scenario a bit. Suppose we still rate our artists as above, but this time instead of asking customers about how well they like country and PBR&B we ask them how well they like various artists and we get something like the following:
+Let's change this scenario a bit. Suppose we still rate our artists as above, but this time instead of asking customers about how well they like country and PBR&B we ask them how well they like various artists and we get something like the following (a question mark indicates that that customer has not rated that artist):
 
 |Customer | Taylor Swift | Miranda Lambert | Carrie Underwood | Jhené Aiko | The Weeknd |
 |:-----------|:------:|:------:|:---------:|:------:|:--------:|
 |Jake|5|?|5|2|2|
 |Clara|2|?|?|4|5|
-|Kelsey|5|5|5|2|-|
-|Ann|2|3|-|5|5|
-|Jessica|2|1|-|5|-|
+|Kelsey|5|5|5|2|?|
+|Ann|2|3|?|5|5|
+|Jessica|2|1|?|5|?|
 
-And based on the table of the country and PBR&B influences of various artists and our customer artist rating table we would like to predict how well our customers like country and PBR&B:
+Based on the table of the country and PBR&B influences of various artists and our customer artist rating table we would like to predict how well our customers like country and PBR&B:
 
 |Customer| Country| PBR&B|
 |:-----------|:------:|:------:|
@@ -107,13 +107,11 @@ And based on the table of the country and PBR&B influences of various artists an
 | Jessica | ? | ?|
 
 >####Take a moment
-> Can you fill in the table above?
+> Can you fill in the table above with just rough guesses? 
 
-My guess is that you can guess these values very accurately. For example, you probably gave Jake a 5 for country and a 2 for PBR&B and Jessica a 1.5 for country and a 5 for PBR&B. 
+My feeling is that you can guess these values very accurately. For example, you probably gave Jake a 5 for country and a 2 for PBR&B and Jessica a 1.5 for country and a 5 for PBR&B. 
 
-So now we have estimates for how well our customers like country and PBR&B. 
-
-Jessica comes into our store. She hasn't rated Carie Underwood or The Weeknd and we are trying to decide which of those two we should recommend to her.  Here are the tables we will need:
+So now we have estimates for how well our customers like country and PBR&B.  Jessica comes into our store. She hasn't rated Carie Underwood or The Weeknd and we are trying to decide which of those two we should recommend to her.  Here are the tables we will need:
 
 
 
@@ -151,9 +149,9 @@ I am going to call the table of ratings *R*:
 |:-----------|:------:|:------:|:---------:|:------:|:--------:|
 |Jake|5|?|5|2|2|
 |Clara|2|?|?|4|5|
-|Kelsey|5|5|5|2|-|
-|Ann|2|3|-|5|5|
-|Jessica|2|1|-|5|-|
+|Kelsey|5|5|5|2|?|
+|Ann|2|3|?|5|5|
+|Jessica|2|1|?|5|?|
 
 the table of how well users like various features *P*:
 
@@ -181,9 +179,9 @@ We've seen that if we have *P* and *Q* we can figure out *R*.  And we have just 
 >####Take a moment and decide
 > Take a look at the above tables and see if that is true.
 
-It is the case that if we know how customers rating artists (*R*) and how well customers like country and PBR&B music (*P*) we can figure out the country and PBR&B influences of the artists (*Q*). 
+It is the case that if we know how customers rated artists (*R*) and how well customers like country and PBR&B music (*P*) we can figure out the country and PBR&B influences of the artists (*Q*). 
 
-You may be wondering what this has to do with the topic we started this chapter with, namely the ALS algorithm. In the previous chapter when we built our recommender we didn't specify any features.
+You may be wondering what this has to do with the topic we started this chapter with, namely the ALS algorithm, since in the previous chapter when we built our recommender we didn't specify any features.
 
 ### Matrix Factorization
 For matrix factorization we don't tell the algorithm a preset list of features (female vocal, country, PBR&B, etc.). Instead we give the algorithm a chart (matrix) like the following:
@@ -194,14 +192,14 @@ For matrix factorization we don't tell the algorithm a preset list of features (
 |:-----------|:------:|:------:|:---------:|:------:|:--------:|
 |Jake|5|?|5|2|2|
 |Clara|2|?|?|4|5|
-|Kelsey|5|5|5|2|-|
-|Ann|2|3|-|5|5|
-|Jessica|2|1|-|5|-|
+|Kelsey|5|5|5|2|?|
+|Ann|2|3|?|5|5|
+|Jessica|2|1|?|5|?|
 
 
 and ask the algorithm to extract a set of features from this data (okay, I may be anthropomorphizing the algorithm a bit). These extracted features are not going to be something like 'female vocals' or 'country influence'. In fact, we don't care what these features represent. Again, we are going to ask the algorithm to extract features that are hidden in that table above. In order to make this sound a bit fancier than 'hidden features' data scientists use the Latin word for 'lie hidden', *lateo*, and call these **latent features**.
 
-The inputs to the matrix factorization algorithm are the data in the chart shown above and the number of latent features to use (for example, 2). The output will be a table of estimated ratings--a table similar to the above but with all the numbers filled in:
+The inputs to the matrix factorization algorithm are the data in the chart shown above and the number of latent features to use (for example, 2). Our goal is to calculate  $\hat{R}$ a table of estimated ratings. That is, a table similar to the above but with all the numbers filled in:
 
 |Customer | Taylor Swift | Miranda Lambert | Carrie Underwood |Jhené Aiko| The Weeknd |
 |:-----------|:------:|:------:|:---------:|:------:|:--------:|
@@ -221,7 +219,7 @@ To get these predicted values we use latent features as an intermediary. Let's s
 
 So feature 2 is much more influential in Jake's rating than feature 1 is.  
 
-We are going to have these feature weights for all our users and by convention we call the resulting matrix, *P*:
+We are going to have these feature weights for all our users and, again, by convention we call the resulting matrix, *P*:
 
 
 
@@ -240,8 +238,8 @@ The other thing we need is how these features are represented in Taylor Swift-- 
 
 
 
-
- |       -   | Feature 1 | Feature 2 |
+ 
+ Artist | Feature 1 | Feature 2 |
 |:-----|:----:|:----:|
 | Taylor Swift | 0.705 | 1.913 |
 | Miranda Lambert | 1.189 | 1.700 |
@@ -264,7 +262,7 @@ If we want to know how Jake will rate Taylor Swift we take Jake's weights for th
 
 and Taylor Swift's:
 
- |       -   | Feature *x* | Feature *y* |
+ Artist   | Feature *x* | Feature *y* |
 |:-----|:----:|:----:|
 | Taylor Swift  | 0.705 | 1.913 |
 
@@ -289,6 +287,20 @@ Let A and B be two vectors of equal length. Then
 
 $$A \cdot  B = \sum_{i=1}^nA_iB_i=A_1B_1+A_2B_2+A_1B_1+...A_nB_n$$
 
+So, for example, if
+
+$$A = [1, 3, 5, 7, 9]$$
+
+and 
+
+$$B = [2, 4, 6, 8, 10]$$
+
+then the dot  product of A and B is
+
+$$A \cdot B = 1 \times 2 + 3 \times 4 + 5 \times 6 + 7 \times 8 + 9 \times 10$$
+
+ 
+
 So above we determined Jake's rating of Taylor Swift by getting the dot product of Jake, *J* and Taylor Swift, *S*:
 
 $$J \cdot  S = 0.717 \times 0.705 +  2.309 \times 1.913 = 4.92$$
@@ -296,11 +308,11 @@ $$J \cdot  S = 0.717 \times 0.705 +  2.309 \times 1.913 = 4.92$$
 And, since I am giving things fancy names in this section,  I am going to call the Table from users to weights of the different features, Matrix P and the table from artists to weight Matrix Q. Once we have P and Q it is easy to make predictions. 
 
 #### Multiplying matrices
-Great. We now have an estimate of how Jake will rate Taylor Swift. Now we want to do this for all user, artist pairs. to get $\hat{R}$  (the little hat over the *R* indicates it is our estimate of the ratings). The actual ratings are in the matrix *R* above. We get $\hat{R}$ by multiplying the *P* and *Q* matrices together.  Here's the thing about multipying matrices. To multiply matrices one matrix needs to have the same number of columns as the other has rows. If you look at *P* and *Q* above you can see that this is not the case. To make this work out mathematically, we need to flip one of the matrices on-end so that the rows become the columns. Let's do this for matrix Q. So *Q* originally is 
+Great. We now have an estimate of how Jake will rate Taylor Swift. Now we want to do this for all user, artist pairs to get $\hat{R}$  (the little hat over the *R* indicates it is our estimate of the ratings). The actual ratings are in the matrix *R* above. We get $\hat{R}$ by multiplying the *P* and *Q* matrices together.  Here's the thing about multipying matrices. To multiply matrices one matrix needs to have the same number of columns as the other has rows. If you look at *P* and *Q* above you can see that this is not the case. To make this work out mathematically, we need to flip one of the matrices on-end so that the rows become the columns. Let's do this for matrix Q. So *Q* originally is 
 
 
 
- |       -   | Feature 1 | Feature 2 |
+Artist  | Feature 1 | Feature 2 |
 |:-----|:----:|:----:|
 | Taylor Swift | 0.705 | 1.913 |
 | Miranda Lambert | 1.189 | 1.700 |
@@ -347,7 +359,7 @@ and when we do this multiplication we will get the filled in version of our esti
 |Angelica|-|-|-|-|-|
 |Jordyn|-|-|-|-|-|
 
-Here is how we multiply matrices *P* and $Q^T$ together.  To get the value of the first row, first column of our result (in our case Jake's estimated rating of Taylor Swift) we take the dot product of the first row of *P* and the first column of $Q^T$.  
+Here is how we multiply matrices *P* and $Q^T$ together.  To get the value of the first row, first column of our result (in our case Jake's estimated rating of Taylor Swift) we take the dot product of the first row of *P* and the first column of $Q^T.$  
 
 ![Multiplying first row of *P* by first row of *Q*](http://guidetodatamining.com/markdownPics/firstRow1.png)
 
@@ -362,7 +374,7 @@ $$ = 0.717 \times 0.705 + 2.309 \times 1.913 = 4.92$$
 |Angelica|-|-|-|-|-|
 |Jordyn|-|-|-|-|-|
 
-To get the estimated value for row one column two (Jake's rating of Miranda Lambert) we take the dot product of the first row of *P* and the second column of  $Q^T$:
+To get the estimated value for row one column two (Jake's rating of Miranda Lambert) we take the dot product of the first row of *P* and the second column of  $Q^T:$
 
 
 ![Multiplying first row of *P* by second row of *Q*](http://guidetodatamining.com/markdownPics/firstRow2.png)
@@ -378,11 +390,12 @@ $$ = 0.717 \times 1.189 + 2.309 \times 1.700 = 4.77$$
 |Kelsey|-|-|-|-|-|
 |Angelica|-|-|-|-|-|
 |Jordyn|-|-|-|-|-|
+
 and so on.
 
 Once we have *P* and *Q* it is easy to generate estimated ratings. But how do we get these matrices?
 
-##How do we get Matrices P and Q?
+###How do we get Matrices P and Q?
 There are several common ways to derive these matrices. I will describe one method which goes by the name **stochastic gradient descent.** The basic idea is this. We are going to randomly select values for *P* and *Q*.  For example, we would randomly select initial values for Jake:
 
 Jake = [0.03, 0.88]
@@ -392,9 +405,19 @@ and randomly select initial values for Taylor Swift:
 Taylor = [ 0.73,  0.49]
 
 So with those initial ratings we get a prediction of 
-$$J \cdot  S = -0.03 \times 0.73 +  0.88 \times 0.49 = 0.45$$
+$$J \cdot  S = 0.03 \times 0.73 +  0.88 \times 0.49 = 0.45$$
 
-which is a particularly bad guess considering Jake really gave Taylor Swift a '5'. So we adjust those values and try again---and adjust and try again. We repeat these process thousands of times until our predicted values get close to the actual values. The general algorithm is
+which is a particularly bad guess considering Jake really gave Taylor Swift a '5'. So we adjust those values. We underestimated Jake's rating of Taylor Swift so we boost maybe something like:
+
+Jake = [0.12, 0.83]
+
+Taylor = [ 0.80,  0.47]
+
+and now we get:
+
+$$J \cdot  S = 0.12 \times 0.80 +  0.83 \times 0.47 = 0.49$$
+
+That is better than before but still we underestimated so we adust and try again. And adjust and try again. We repeat this process thousands of times until our predicted values get close to the actual values. The general algorithm is
 
 1. generate random values for the P and Q matrices
 2. using these P and Q matrices estimate the ratings (for ex., Jake's rating of Taylor Swift).
@@ -402,14 +425,36 @@ which is a particularly bad guess considering Jake really gave Taylor Swift a '5
 4. using this error adjust P and Q to improve our estimate
 5. If our total error rate is small enough or we have gone through a bunch of iterations (for ex., 4000) terminate the algorithm. Else go to step 2.
 
+For how simple this algorithm is, it works surprisingly well.
 
->comment on how well it works.
-
-The other method is called alternating least squares or ALS and this is the one our PredictionIO recommendation engine uses.
+The other method of estimated *P* and *Q* is called alternating least squares or ALS and this is the one our PredictionIO recommendation engine uses.
 
 ##Alternating Least Squares
 
-Let's remind ourselves of the task. We are given matrix *R* and we would like to estimate *P* and *Q*. Recall that earlier in the chapter we determined that if we had 2 of the matrices we could determine the third. The example used in that section is that if we had the matrix of users rating different artists and the matrix of how much country and PBR&B influences those artists exhibit we could determine how much each customer liked country and PBR&B. We also saw that if we had the matrix of users rating different artists and a matrix representing how much each customer liked country and PBR&B, then we could determine the country and PBR&B influences for each artist. Unfortunately we only have one of the matrices, not two. So we randomly guess the values of one of the other matrices. Suppose we guess at the values of *Q*. Now we have two matrices, *R* and *Q* and we can determine *P*. Now we have all three matrices but for *Q* we just took a random guess, so it is a bit dodgy. But that is okay because now we have *P*, and with *P* and *R* we can determine a better guess for *Q*. So we do that.
+Let's remind ourselves of the task. We are given matrix *R* and we would like to estimate *P* and *Q*. Recall that earlier in the chapter we determined that if we had 2 of the matrices we could determine the third. The example used in that section was that if we had the matrix of users rating different artists
+
+
+|Customer | Taylor Swift | Miranda Lambert | Carrie Underwood | Jhené Aiko | The Weeknd |
+|:-----------|:------:|:------:|:---------:|:------:|:--------:|
+|Jake|5|?|5|2|2|
+|Clara|2|?|?|4|5|
+|Kelsey|5|5|5|2|?|
+|Ann|2|3|?|5|5|
+|Jessica|2|1|?|5|?|
+
+
+ and the matrix of how much country and PBR&B influences those artists exhibit 
+ 
+ |Artist| Country| PBR&B|
+|:-----------|:------:|:------:|
+| Taylor Swift | 0.90 | 0.05|
+|Miranda Lambert | 0.98| 0.00|
+|Carrie Underwood|0.95| 0.03|
+| Jhené Aiko | 0.01 | 0.99 |
+| The Weeknd | 0.03 | 0.98 |
+
+ 
+ we could determine how much each customer liked country and PBR&B. We also saw that if we had the matrix of users rating different artists and a matrix representing how much each customer liked country and PBR&B, then we could determine the country and PBR&B influences for each artist.  So as long as we had two of the matrices we could determine the third. Unfortunately we only have one of the matrices, not two. It seems we are stuck. But there is a way to bootstrap our way of of this problem. We simply randomly guess the values of one of the other two matrices. Suppose we guess at the values of *Q*. Now we have two matrices, *R* and *Q* and we can determine *P*. Now we have all three matrices but for *Q* we just took a random guess, so it is a bit dodgy. But that is okay because now we have *P*, and with *P* and *R* we can determine a better guess for *Q*. So we do that.
 
 *P* is a bit dodgy as well since it was based on our original wild guess for *Q*, but now that we have a better value for *Q* we can use that to recompute *P*.  So the algorithm is this.
 
@@ -418,4 +463,123 @@ Let's remind ourselves of the task. We are given matrix *R* and we would like to
 3. use that and *R* to compute *Q*
 4. while we haven't reached the max number of iterations go to 2.
 
-The word *alternating* in *alternating least squares* is based on us alternating our computations of *P* and *Q*. 
+The word *alternating* in *alternating least squares* is based on us alternating our computations of *P* and *Q*. Now you may be wondering what the *least squares* bit means. We are given the matrix *R* and initially we compute random values for *Q*. Then, using *R* and *Q* we are going to compute the best possible *P*. But what do we mean by *best possible*? Let's say *R* the ratings customers gave artists is:
+
+
+|Customer | Taylor Swift | Miranda Lambert | Jhené Aiko | The Weeknd |
+|:-----------|:------:|:------:|:---------:|:------:|:--------:|
+|Jake|5|?|2|2|
+|Ann|2|?|5|?|
+
+
+and using the *Q* and *R* matrices we get $\hat{R}$ our estimate of *R*.
+
+
+|Customer | Taylor Swift | Miranda Lambert | Jhené Aiko | The Weeknd |
+|:-----------|:------:|:------:|:---------:|:------:|:--------:|
+|Jake|2.5|?|1.0|3.5|
+|Ann|5.0|?|3.5|?|
+
+
+So how good of a guess is it? Well, let's see. Jake really gave Taylor Swift a 5 and our algorithm predicted a 2.5. That is 2.5 different. And Jake gave Jhené Aiko a 2 and our algorithm predicted a 1. That is 1 different. It sounds like a good idea might be to add up all these differences. The one twist we do is square the difference. So for each artist we subtract what our algorithm predicted from Jake's actual rating and square that. Then we sum those up:
+
+$$SquaredError = (5-2.5)^2 + (2 - 1)^2 + (2 - 3.5)^2 + (2 - 5)^2 + (5 - 3.5)^2$$$ = 6.25 + 1 + 2.25 + 9 + 2.25 = 20.75
+
+The smaller this number is, the closer our estimate is to Jake's real ratings.  So to start we have the real ratings $R$ and our guess for *Q*  and using those we are going to select a *P* which has results in the smallest squared error. Once we have this *P* we hold it constant and use it and $R$ to determine the *Q* that results in the least squared error and so on. So the least squares bit of *Alternating Least Squares* means using this measure to compute how close our estimate is to the real ratings.
+
+
+## back to PredictionIO
+Recall that when we looked at the engine.json file we saw several parameters being sent to the ALS algorithm:
+
+
+	{
+	  "id": "default",
+	  "description": "Default settings",
+	  "engineFactory": "org.zacharski.RecommendationEngine",
+	  "datasource": {
+	    "params" : {
+      "appName": "MusicApp"
+	    }
+	  },
+	  "algorithms": [
+	    {
+	      "name": "als",
+	      "params": {
+	        "rank": 10,
+	        "numIterations": 20,
+	        "lambda": 0.01,
+	        "seed": 3
+	      }
+	    }
+	    ]	
+	}
+
+#####rank
+The rank parameter specifies how many latent features to have. As you can see when we built our recommender in chapter one we used 10 latent features.  The more latent features you have the better the accuracy of the recommender. For example, one seminal paper in this area [Large-scale Parallel Collaborative Filtering for the Netflix Prize](http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=B446F454E5DD7BDDA0FD717CF8A5F1CC?doi=10.1.1.173.2797&rep=rep1&type=pdf) by Zhou et al. used 1000 features. However, the more latent features you use the more memory your recommender will take. In most cases a value between 10 and 500 is reasonable.
+#####numIterations
+As you can guess, this parameter refers to the number of iterations (repeating steps 2 and 3 above) the algorithm executes. As you might think, the more iterations, the better the results, but surprisingly, the algorithm needs very few iterations to produce good values for the *P* and *Q* matrices. Generally, a value between 10 and 20 will be sufficient.
+#####lambda
+In many machine learning algorithms, we train the algorithm on some set of data (called the training set) and once it is trained we use it on new data. There is a danger that the algorithm is so highly tuned to the training data that it performs poorly on the new data. This is called **overfitting**.   In the ALS algorithm, one potential cause of overfitting is having some latent features having extreme values. This lambda is roughly how much we are weighing these extreme values. The greater the lambda the more the algorithm dislikes solutions that contain extreme values.
+
+#####seed
+Recall the the first step of the algorithm is to generate random values for one of the matrices. Generally, each time we run the algorithm we get different initial values and because these initial values are different, the final results can vary as well. Often when we are testing, we want the algorithm to be deterministic and produce the exact same results each time we run it. To do so, we pass in a value for this seed parameter. In the example above, we passed the value 3 as a seed.
+
+## Another dataset.
+Before moving on, let's try building a recommender with a small dataset. The [Small MovieLens Latest dataset](http://files.grouplens.org/datasets/movielens/ml-latest-small-README.html) contains slightly over 100,000 ratings of about eight thousand movies by 706 users.  You already know all the steps to build a recommender. Can you do so with this data? The `ratings.csv` file contains lines like
+$$1,122,5,838985046$$
+
+which means that person 1 gave movie 122 a rating of a 5 at Unix timestamp 838985046 (Friday, August 2, 1996 at 11:24GMT).  The file movies.csv matches those movie IDs with actual movie titles (movie 122 in this case is Boomerang). You might want to write your import code to put the names of the movies in the data store.
+
+### one solution.
+First, here is the code I used to import the data:
+
+```
+import predictionio
+
+def readMovieInfo(filename):
+	movies = {}
+	with open(filename) as f:
+		for line in f:
+			entry = line.split(",")
+			movies[entry[0]] = entry[1]
+	return movies
+
+
+
+DELIMITER = ","
+
+def import_events(client):
+	movieInfo = readMovieInfo('ml-latest-small/movies.csv')
+	count = -1
+	with open('ml-latest-small/ratings.csv') as f:
+		for line in f:
+			if count >= 0:
+				data = line.rstrip('\r\n').split(',')	
+				#print data[2]
+				client.create_event(
+	        		event="rate",
+	        		entity_type="user",
+	        		entity_id=data[0],
+	        		target_entity_type="item",
+	        		target_entity_id=movieInfo[data[1]],
+
+	        		properties= { "rating" : float(data[2]) }
+	        	)   
+			count += 1
+			if count % 100 == 0:
+				print count
+  	
+  	print "%s events are imported." % count
+
+client = predictionio.EventClient(
+    access_key='RXHfSFysjZBXDh3i2zKxMHKnmwHCLe2ows4duuITm46Zbpg6bGFvVbmfpiuvudH8',
+    url='http://localhost:7070',
+    threads=5,
+    qsize=500)
+import_events(client)
+
+
+```
+
+
+
