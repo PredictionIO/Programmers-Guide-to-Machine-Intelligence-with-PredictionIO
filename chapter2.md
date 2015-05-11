@@ -525,16 +525,15 @@ In many machine learning algorithms, we train the algorithm on some set of data 
 Recall the the first step of the algorithm is to generate random values for one of the matrices. Generally, each time we run the algorithm we get different initial values and because these initial values are different, the final results can vary as well. Often when we are testing, we want the algorithm to be deterministic and produce the exact same results each time we run it. To do so, we pass in a value for this seed parameter. In the example above, we passed the value 3 as a seed.
 
 ## Another dataset.
-Before moving on, let's try building a recommender with a small dataset. The [Small MovieLens Latest dataset](http://files.grouplens.org/datasets/movielens/ml-latest-small-README.html) contains slightly over 100,000 ratings of about eight thousand movies by 706 users.  You already know all the steps to build a recommender. Can you do so with this data? The `ratings.csv` file contains lines like
+Before moving on, let's try building a recommender with a moderate sized dataset. The [ MovieLens Latest dataset](http://files.grouplens.org/datasets/movielens/ml-latest-README.html) contains slightly over 20 million ratings of about 27,000 movies by 229,000 users.  You already know all the steps to build a recommender. Can you do so with this data? The `ratings.csv` file contains lines like
 $$1,122,5,838985046$$
 
-which means that person 1 gave movie 122 a rating of a 5 at Unix timestamp 838985046 (Friday, August 2, 1996 at 11:24GMT).  The file movies.csv matches those movie IDs with actual movie titles (movie 122 in this case is Boomerang). You might want to write your import code to put the names of the movies in the data store.
-
-### one solution.
-First, here is the code I used to import the data:
+which means that person 1 gave movie 122 a rating of a 5 at Unix timestamp 838985046 (Friday, August 2, 1996 at 11:24GMT).  The file movies.csv matches those movie IDs with actual movie titles (movie 122 in this case is Boomerang). We could import our data as before using a similar python script but there is a faster way to load large datasets.  We will first use the following Python script to convert the movie data into a json file:
 
 ```
+ 
 import predictionio
+exporter = predictionio.FileExporter(file_name="my_events.json")
 
 def readMovieInfo(filename):
 	movies = {}
@@ -544,19 +543,15 @@ def readMovieInfo(filename):
 			movies[entry[0]] = entry[1]
 	return movies
 
-
-
-DELIMITER = ","
-
-def import_events(client):
-	movieInfo = readMovieInfo('ml-latest-small/movies.csv')
+def import_events():
+	movieInfo = readMovieInfo('ml-latest/movies.csv')
 	count = -1
-	with open('ml-latest-small/ratings.csv') as f:
+	with open('ml-latest/ratings.csv') as f:
 		for line in f:
 			if count >= 0:
 				data = line.rstrip('\r\n').split(',')	
 				#print data[2]
-				client.create_event(
+				exporter.create_event(
 	        		event="rate",
 	        		entity_type="user",
 	        		entity_id=data[0],
@@ -564,22 +559,71 @@ def import_events(client):
 	        		target_entity_id=movieInfo[data[1]],
 
 	        		properties= { "rating" : float(data[2]) }
-	        	)   
+	        		)   
 			count += 1
-			if count % 100 == 0:
+			if count % 1000 == 0:
 				print count
   	
   	print "%s events are imported." % count
+  	exporter.close()
 
-client = predictionio.EventClient(
-    access_key='RXHfSFysjZBXDh3i2zKxMHKnmwHCLe2ows4duuITm46Zbpg6bGFvVbmfpiuvudH8',
-    url='http://localhost:7070',
-    threads=5,
-    qsize=500)
-import_events(client)
-
+import_events()
 
 ```
 
+The contents of the output json file look like:
 
+```
+
+{"eventTime": "2015-05-11T02:08:42.917+0000", "entityType": "user", "targetEntityType": "item", "event": "rate", "entityId": "1", "targetEntityId": "Interview with the Vampire: The Vampire Chronicles (1994)", "properties": {"rating": 3.0}}
+{"eventTime": "2015-05-11T02:08:42.918+0000", "entityType": "user", "targetEntityType": "item", "event": "rate", "entityId": "1", "targetEntityId": "Jaws (1975)", "properties": {"rating": 3.0}}
+{"eventTime": "2015-05-11T02:08:42.918+0000", "entityType": "user", "targetEntityType": "item", "event": "rate", "entityId": "1", "targetEntityId": "Scream (1996)", "properties": {"rating": 5.0}}
+{"eventTime": "2015-05-11T02:08:42.918+0000", "entityType": "user", "targetEntityType": "item", "event": "rate", "entityId": "1", "targetEntityId": "Scream 2 (1997)", "properties": {"rating": 5.0}}
+
+```
+
+Now we can load the data into PredictionIO with the command
+
+     pio import --appid 1 --input my_events.json
+
+(or whatever the appid is in your case).
+
+As before we create  a recommendation Engine:
+
+1. execute  `pio template get PredictionIO/template-scala-parallel-recommendation movieRecommender`
+2.  edit the `engine.json` file to add the app name
+3.  build the system by executing `pio build`
+
+Before we train our system we will do one additional thing.
+
+
+####Increasing the memory allocated to training
+By default the amount of memory allocated for training is 512MB. Let's bump that up a bit. For me I am going to allocated 24GB, but use a number that is right for your system.
+
+1. Within the PredictionIO directory there is the directory vendors/spark-1.3.0/conf. Within that folder make a copy of the spark-defaults.conf.template and call it spark-defaults.conf.
+2. Edit the spark-defaults.conf file by uncommenting the `spark.driver.memory` line and changing the value from 5 to 24.
+3. Adding the line `spark.executor.memory 24g`
+4. save the file.
+
+The resulting file should look like
+
+```
+# Example:
+# spark.master                     spark://master:7077
+# spark.eventLog.enabled           true
+# spark.eventLog.dir               hdfs://namenode:8021/directory
+# spark.serializer                 org.apache.spark.serializer.KryoSerializer
+spark.driver.memory              24g
+# spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
+spark.executor.memory   24g
+
+```
+
+Let's go ahead and train our system.
+
+```
+pio train
+```
+
+Depending on your machine training can take a long time. On my machine it took a bit over 15 minutes.
 
