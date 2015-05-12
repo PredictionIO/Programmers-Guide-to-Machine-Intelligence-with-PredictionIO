@@ -586,7 +586,7 @@ Now we can load the data into PredictionIO with the command
 
      pio import --appid 1 --input my_events.json
 
-(or whatever the appid is in your case).
+(or whatever the appid is in your case). On my, not particularly fast, machine it took slightly under 15 minutes.
 
 As before we create  a recommendation Engine:
 
@@ -619,11 +619,73 @@ spark.executor.memory   24g
 
 ```
 
-Let's go ahead and train our system.
+Let's go ahead and train our system. 
 
 ```
 pio train
 ```
 
-Depending on your machine training can take a long time. On my machine it took a bit over 15 minutes.
+Depending on your machine training can take a long time. On my machine it took a bit under 15 minutes.
+
+### How good is the recommender?
+So we are sitting at a bar with our friends, all of whom also built recommenders and we get to arguing about whose recommender is better. Is there an objective measure we could use to settle the argument?  A bit ago we talked about using a distance measure--if Jake's real rating of Taylor Swift was a 5 and our recommender predicted a 4.5 and Mary's recommender predicted a 4.75--Mary's recommendation is better since it is closer to the real rating.  But maybe Jake's rating of Taylor Swift  was a fluke and our recommender would do better with some other rating. So we will test on a set of data where we know the ratings. Plus, we will test on data that hasn't been seen by the recommender. XXX.  And we will compute the average distance between our estimate and the real value. This is called root-mean-square-deviation and the formula is as follows:
+
+
+$$
+RMSD = \sqrt{\frac{\sum_{i=1}^{n}(r_i - \hat{r}_i)^2}{n}}
+$$
+
+*n* is the number of ratings in our test data. $r_i$ refers to the $i^{th}$ rating, for example, Jake rating Taylor Swift. $\hat{r}_i$ refers to our estimate of *r*. *RMSD* represents how far our recommender's estimates were off on average. So, an *RMSD* of 0.5 means that on average if the actual rating was a 4 our recommender might predict a 3.5 or 4.5.
+
+####The effect of the number of latent features
+A bit ago when we were looking at the engine.json file:
+
+
+
+	{
+	  "id": "default",
+	  "description": "Default settings",
+	  "engineFactory": "org.zacharski.RecommendationEngine",
+	  "datasource": {
+	    "params" : {
+      "appName": "MusicApp"
+	    }
+	  },
+	  "algorithms": [
+	    {
+	      "name": "als",
+	      "params": {
+	        "rank": 10,
+	        "numIterations": 20,
+	        "lambda": 0.01,
+	        "seed": 3
+	      }
+	    }
+	    ]	
+	}
+
+
+Here, rank refers to the number of latent features. I mentioned that the more latent features the more accurate the recommender. Let's see if this is the case with a small experiment.  Before I loaded the movielens data I removed 10 ratings. Thus, when the recommender was trained, it did not see these ratings.  My plan was to train a recommender that uses 2 features, 10, 50, and 100 and see which is better using *RMSE*. Here is the raw data:
+
+User | Movie | Actual | 2  | 10 | 50 | 100 | 
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|2| Minority Report | 4 | 3.504 | 3.705 | 3.638 | 3,148|
+|10| Star Wars IV | 5| 3.760 | 3.858 | 4.650 | 5.061 |
+|33|KungFu Panda| 4 | 4.272 | 4.160|4.042|4.363|
+|58|Gravity| 2.5|3.597|3.293| 3.265 | 3.043 |
+|89|Interstellar|5| 5.121|4.867|4.876|5.020|
+|101|Harry Potter -Chamber| 4| 4.079| 4.280|3.802|4.145|
+|125|Mulholland Drive| 3 | 2.622|2.410|2.962|1.877|
+|156|Frozen|5|3.281|3.703|3.618|4.645|
+|211|Edge of Tomorrow|4|3.476|3.044|3.598|3.819|
+|872|Eternal Sunshine|4|4.247|4.393|3.623|3.718|
+
+And here is the resulting *RMSD:*
+
+|latent features | 2 | 10 | 50 | 100 |
+|:-----:|:-----:|:-----:|:-----:|:-----:|
+|*RMSD*|0.80755| 0.7239|0.5576| 0.5174|
+
+So our tiny experiment supports the previous substantial evidence that the more latent features the better the accuracy. Keep in mind that our experiment with only 10 test cases is tiny. It may offer support in a bar discussion, or may be a good late-night test to make sure we are not doing something screwy, but as we will see later, there are better ways to evaluate algorithm performance.
+
 
