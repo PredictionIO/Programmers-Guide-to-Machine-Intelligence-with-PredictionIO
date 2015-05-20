@@ -9,7 +9,7 @@
  Recall that when we built our recommendation system we based it on a template:
  
  
-     vagrant:/vagrant$ pio template get PredictionIO/template-scala-parallel-recommendation musicRecommender
+     ~$ pio template get PredictionIO/template-scala-parallel-recommendation musicRecommender
      Please enter author's name: Ron Zacharski
      Please enter the template's Scala package name (e.g. com.mycompany): org.zacharski
      Please enter author's e-mail address: ron.zacharski@gmail.com
@@ -18,7 +18,7 @@
 	Engine template PredictionIO/template-scala-parallel-recommendation is now ready at musicRecommender
 
 
-This command downloads the recommender template, template-scala-parallel-recommendation-0.3.0, and places the files that make up this template in a directory called musicRecommender. In that directory we see a file titled engine.json and that file contains the following text:
+This command downloads the recommender template, template-scala-parallel-recommendation-0.3.0, and places the files that make up this template in a directory called `musicRecommender`. In that directory we see a file titled `engine.json`, which we edited to add our appName, `MusicApp`:
 
 	{
 	  "id": "default",
@@ -42,7 +42,7 @@ This command downloads the recommender template, template-scala-parallel-recomme
 	    ]	
 	}
 
-One interesting part of this file is that we see that the recommender is using the ALS algorithm (alternating least squares) and we pass that algoritm several parameters such as rank and number of iterations. Let's check out how this ALS algorithm works.
+One interesting part of this file is that we see that the recommender is using the ALS algorithm (alternating least squares) and we pass that algorithm several parameters such as rank and number of iterations. Let's check out how this ALS algorithm works.
 
 The Basics
 --
@@ -51,7 +51,7 @@ Let's say we work in a vinyl record and CD store downtown. A customer comes in a
 
 Another way we might come up with a recommendation is as follows. We know Taylor Swift and Carrie Underwood CDs share certain features. They both, obviously, have prominent female vocals. They both feature singer-songwriters They both have country influences and no PBR&B influences (the term PBR&B, aka hipster R&B and R neg B, is a portmanteau of PBR--Pabst Blue Ribbon, the hipster beer of choice--and R&B).  Then we think "Hey, Miranda Lambert CDs also have prominent female vocals and have country influences but no PBR&B influences, and we recommend Miranda Lambert to our new customer. With this recommendation method we extract a set of features from CDs this person likes and then think what other CDs share these features. 
 
-Let's check this out a bit further. Suppose customers rate artists on a scale of 0 to 5 and we would like to predict how customers might rate a particular artist they haven't heard.   Let's restrict ourselves to two features (country and PBR&B influences), five artists (Taylor Swift, Miranda Lambert,  Carrie Underwood, Jhené Aiko, and The Weeknd) and two customers (Jake and Ann).  As owners of the vinyl record store we have gone through and rated the  artists on these features. 
+Let's check this out a bit further. We will restrict ourselves to two features (country and PBR&B influences), five artists (Taylor Swift, Miranda Lambert,  Carrie Underwood, Jhené Aiko, and The Weeknd) and two customers (Jake and Ann).  As owners of the vinyl record store we have gone through and meticulously rated artists on these features. 
 
 |Artist| Country| PBR&B|
 |:-----------|:------:|:------:|
@@ -159,7 +159,7 @@ the table of how well users like various features *P*:
 |Customer| Country| PBR&B|
 |:-----------|:------:|:------:|
 | Jake | 5 | 2|
-| Clara | 2 | 4.5?|
+| Clara | 2 | 4.5|
 | Kelsey | 5 | 2|
 |Ann | 2.5| 5|
 | Jessica | 1.5 | 5|
@@ -197,9 +197,9 @@ For matrix factorization we don't tell the algorithm a preset list of features (
 |Jessica|2|1|?|5|?|
 
 
-and ask the algorithm to extract a set of features from this data (okay, I may be anthropomorphizing the algorithm a bit). These extracted features are not going to be something like 'female vocals' or 'country influence'. In fact, we don't care what these features represent. Again, we are going to ask the algorithm to extract features that are hidden in that table above. In order to make this sound a bit fancier than 'hidden features' data scientists use the Latin word for 'lie hidden', *lateo*, and call these **latent features**.
+and ask the algorithm to extract a set of features from this data. To anthropomorphize this yet even more, it is like asking the algorithm, *Okay algorithm, given 2 features (or some number of features) call them feature 1 and feature 2, can you come up with the P and Q matrices?*  These extracted features are not going to be something like 'female vocals' or 'country influence'. In fact, we don't care what these features represent. Again, we are going to ask the algorithm to extract features that are hidden in that table above. In order to make this sound a bit fancier than 'hidden features' data scientists use the Latin word for 'lie hidden', *lateo*, and call these **latent features**.
 
-The inputs to the matrix factorization algorithm are the data in the chart shown above and the number of latent features to use (for example, 2). Our goal is to calculate  $\hat{R}$ a table of estimated ratings. That is, a table similar to the above but with all the numbers filled in:
+The inputs to the matrix factorization algorithm are the data in the chart shown above and the number of latent features to use (for example, 2). Our eventual goal is to calculate  $\hat{R}$ a table of estimated ratings. That is, a table similar to the above but with all the numbers filled in:
 
 |Customer | Taylor Swift | Miranda Lambert | Carrie Underwood |Jhené Aiko| The Weeknd |
 |:-----------|:------:|:------:|:---------:|:------:|:--------:|
@@ -297,7 +297,7 @@ $$B = [2, 4, 6, 8, 10]$$
 
 then the dot  product of A and B is
 
-$$A \cdot B = 1 \times 2 + 3 \times 4 + 5 \times 6 + 7 \times 8 + 9 \times 10$$
+$$A \cdot B = 1 \times 2 + 3 \times 4 + 5 \times 6 + 7 \times 8 + 9 \times 10 =  190$$
 
  
 
@@ -396,7 +396,7 @@ and so on.
 Once we have *P* and *Q* it is easy to generate estimated ratings. But how do we get these matrices?
 
 ###How do we get Matrices P and Q?
-There are several common ways to derive these matrices. I will describe one method which goes by the name **stochastic gradient descent.** The basic idea is this. We are going to randomly select values for *P* and *Q*.  For example, we would randomly select initial values for Jake:
+There are several common ways to derive these matrices. One method is called **stochastic gradient descent.** The basic idea is this. We are going to randomly select values for *P* and *Q*.  For example, we would randomly select initial values for Jake:
 
 Jake = [0.03, 0.88]
 
@@ -456,7 +456,7 @@ Let's remind ourselves of the task. We are given matrix *R* and we would like to
  
  we could determine how much each customer liked country and PBR&B. We also saw that if we had the matrix of users rating different artists and a matrix representing how much each customer liked country and PBR&B, then we could determine the country and PBR&B influences for each artist.  So as long as we had two of the matrices we could determine the third. Unfortunately we only have one of the matrices, not two. It seems we are stuck. But there is a way to bootstrap our way of of this problem. We simply randomly guess the values of one of the other two matrices. Suppose we guess at the values of *Q*. Now we have two matrices, *R* and *Q* and we can determine *P*. Now we have all three matrices but for *Q* we just took a random guess, so it is a bit dodgy. But that is okay because now we have *P*, and with *P* and *R* we can determine a better guess for *Q*. So we do that.
 
-*P* is a bit dodgy as well since it was based on our original wild guess for *Q*, but now that we have a better value for *Q* we can use that to recompute *P*.  So the algorithm is this.
+Now *P* is a bit dodgy as well since it was based on our original wild guess for *Q*, but now that we have a better value for *Q* we can use that to recompute *P*.  So the algorithm is this.
 
 1. compute random values for *Q*
 2. use that and *R* to compute *P* 
@@ -628,7 +628,7 @@ pio train
 Depending on your machine training can take a long time. On my machine it took a bit under 15 minutes.
 
 ### How good is the recommender?
-So we are sitting at a bar with our friends, all of whom also built recommenders and we get to arguing about whose recommender is better. Is there an objective measure we could use to settle the argument?  A bit ago we talked about using a distance measure--if Jake's real rating of Taylor Swift was a 5 and our recommender predicted a 4.5 and Mary's recommender predicted a 4.75--Mary's recommendation is better since it is closer to the real rating.  But maybe Jake's rating of Taylor Swift  was a fluke and our recommender would do better with some other rating. So we will test on a set of data where we know the ratings. Plus, we will test on data that hasn't been seen by the recommender. XXX.  And we will compute the average distance between our estimate and the real value. This is called root-mean-square-deviation and the formula is as follows:
+So we are sitting at a bar with our friends, all of whom also built recommenders for the Movie Lens data and we get to arguing about whose recommender is better. Is there an objective measure we could use to settle the argument?  A bit ago we talked about using a distance measure—if Jake's real rating of Taylor Swift was a 5 and our recommender predicted a 4.5 and Mary's recommender predicted a 4.75—Mary's recommendation is better since it is closer to the real rating.  But maybe Jake's rating of Taylor Swift  was a fluke and our recommender would do better with some other rating—say Clara's rating of Jhené Aiko. So we will test on a set of data where we know the ratings. Plus, we will test on data that hasn't been seen by the recommender.  And we will compute the average distance between our estimate and the real value. This is called root-mean-square-deviation and the formula is as follows:
 
 
 $$
@@ -665,7 +665,7 @@ A bit ago when we were looking at the engine.json file:
 	}
 
 
-Here, rank refers to the number of latent features. I mentioned that the more latent features the more accurate the recommender. Let's see if this is the case with a small experiment.  Before I loaded the movielens data I removed 10 ratings. Thus, when the recommender was trained, it did not see these ratings.  My plan was to train a recommender that uses 2 features, 10, 50, and 100 and see which is better using *RMSE*. Here is the raw data:
+Here, rank refers to the number of latent features. I mentioned that the more latent features the more accurate the recommender. Let's see if this is the case with a small experiment.  Before I loaded the movielens data I removed 10 ratings. Thus, when the recommender was trained, it did not see these ratings.  My plan was to train a recommender that uses 2 features, 10, 50, and 100 and see which is better using *RMSE*. Here is the raw data of the results:
 
 User | Movie | Actual | 2  | 10 | 50 | 100 | 
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
@@ -686,6 +686,6 @@ And here is the resulting *RMSD:*
 |:-----:|:-----:|:-----:|:-----:|:-----:|
 |*RMSD*|0.80755| 0.7239|0.5576| 0.5174|
 
-So our tiny experiment supports the previous substantial evidence that the more latent features the better the accuracy. Keep in mind that our experiment with only 10 test cases is tiny. It may offer support in a bar discussion, or may be a good late-night test to make sure we are not doing something screwy, but as we will see later, there are better ways to evaluate algorithm performance.
+So our tiny experiment supports the previous substantial evidence that the more latent features the better the accuracy. Keep in mind that our experiment with only 10 test cases is tiny. It may offer support in a bar discussion, or may be a good late-night test to make sure we are not doing something screwy, but as we will see later, there are better ways to evaluate algorithm performance. 
 
 
