@@ -3,7 +3,7 @@
 ---
 
 ####Proposed outline
-The book would be a short (~250 page or so) book on using PredictionIO for data mining/machine learning focusing on real world applications. It will cover 3 three general data mining themes: recommendation systems, clustering systems, and classifiers. The book does not intend to offer a comprehensive discussion of all the algorithms in these areas. And it will not fully explain the theory of the algorithms. Rather, the goal is a practical one---for readers to be able to use PredictionIO on their own data to solve problems. After a few introductory chapters, each of the three themes is presented in 2 or 3 chapters. The first chapter provides an general description of the theme (for example, recommendation systems) and presents a step-by-step example of using PredictionIO  to solve a representative problem in the area. The next chapter presents several common recipes/algorithms and works through a complete example. The final chapter of each section  presents a larger real-world application, where we use a cluster of Amazon EC2 instances. This final chapter of the trio may also describe issues in deploying such systems and may end with one or more short case studies of how these systems are used. An alternative presentation is to present a simple cluster example early but reserve most of the discussion to a final chapter or two of the book.
+The book would be a short (~250 page or so) book on using PredictionIO for data mining/machine learning focusing on real world applications. It will cover 3 three general data mining themes: recommendation systems, clustering systems, and classifiers. The book does not intend to offer a comprehensive discussion of all the algorithms in these areas. And it will not fully explain the theory of the algorithms. It will give sufficient information so readers will generally know how the algorithms work. The goal is a practical one---for readers to be able to use PredictionIO on their own data to solve problems.  After a few introductory chapters, each of the three themes is presented in 2 or 3 chapters. The first chapter provides an general description of the theme (for example, recommendation systems) and presents a step-by-step example of using PredictionIO  to solve a representative problem in the area. The next chapter presents several common recipes/algorithms and works through a complete example. The final chapter of each section  presents a larger real-world application, where we use a cluster of Amazon EC2 instances. This final chapter of the trio may also describe issues in deploying such systems and may end with one or more short case studies of how these systems are used. An alternative presentation is to present a simple cluster example early but reserve most of the discussion of using clusters to a final chapter or two of the book.
 
 #####Preface - 
 TBD
@@ -190,3 +190,11 @@ List of topics to be covered in the chapter:
 
 #####Chapter 12:  Clustering big data on a cluster
 ######estimated page count: 20
+
+---
+Part 5: Deploying Production Level Systems
+---
+
+not sure here. Probably do this in collaboration with several people.
+
+
