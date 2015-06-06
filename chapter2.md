@@ -78,28 +78,60 @@ Spark itself is a unified stack of applications. Several of these are worth noti
 The Spark Core provides an API that provides a layer of abstraction over such implementation details as how the data is stored. 
 One main programming abstraction of the Spark Core is the *Resilient Distributed Dataset* or RDD. You will see this term quite frequently when we dive into the Scala code that drives PredictionIO. An RDD is an interface that describes a collection of logical records. Physically, these records might be rows in an HBase table, objects in memory, or objects in a Cassandra database. These records might be stored on one computer or a cluster of thousands of computers. The RDD is an abstraction that hides these details. To the user of Spark the data is a collection of records that can be operated on in parallel. We will learn more about RDDs throughout this book. 
 
-The Spark Core provides
+The Spark Core also contains components for handling scheduling, fault recovery, and a range of other tasks.
 
+#####MLlib
+MLlib is the machine learning library containing a wide range of machine learning algorithms. These include algorithms for classification, regression, recommendation, and clustering. PredictionIO makes heavy use of this library, but we should mention that in using PredictionIO you are not limited to just the algorithms provided by MLlib. 
+
+####ElasticSearch
+Apache Lucene is a text search/information retrieval software library. It reads and indexes text and provides an extensive API for search that index. It has been tuned for speed particularly with large datasets. It's used by a variety of companies including those with heavily-trafficked websites such as Disney, Ticketmaster and Twitter. **ElasticSearch**, as the name suggests, is a search server and it is built upon Apache Lucene.  In addition to other services, it provides an easy-to-use wrapper around Lucene. ElasticSearch is distributed and the indices it creates can be divided among a number of computers in a cluster.
+
+ElasticSearch is used in a number of ways in PredictionIO most of which deal with the storage of metadata such as version control of models and engines, and evaluation results.
 
 ####Apache Zookeeper
 As you can imagine, when you are trying to distribute work across even a small cluster of computers there is significant configuration and synchronization that needs to be done. Zookeeper provides the infrastructure for this and manages the serialization and synchronization of tasks across the cluster.  Both Spark and HBase extensively uses Zookeeper.
 
-####ElasticSearch
-Elastic Search, as the name suggests, is a search server. and it is built on Apache Lucene. a
+
+### The DASE Architecture
+The developers have designed PredictionIO based on what they call the DASE architecture. This architecture defines the four components you need to specify to create a PredictionIO machine learning engine: the **D**ata source and data preparator, the machine learning **A**lgorithm, the **S**erving component which responds to queries, and the **E**valuation metrics.  The execution flow is something like this:
+
+![Alt text](http://guidetodatamining.com/markdownPics/DASEarchitecture.png)
+
+When we download and build an engine there is a bit of Scala code that specifies all these components. When we build our recommendation system in the previous chapter we merrily ignored this code and used the default implementation. Starting with the next chapter we will start our gradual dive into learning how to refine these DASE components to better fit the particular application we are building. As a preface to that hands-on work, let us briefly examine each of these four components. 
+
+####The Data Source and Data Preparator
+Typically, the data for your machine learning engine is stored in HBase as described above and that data is represented as a two dimensional hash table a bit like this
+
+```
+ROW   COLUMN     VALUE
+7F2   e:e        rate
+7F2   e:eid      Jake
+7F2   e:ety      User
+7F2   e:p        {"rating":5.0}
+7F2   e:teid     Taylor Swift
+8CE   e:e        rate
+8CE   e:eid      Clara
+8CE   e:ety      User
+8CE   e:p        {"rating":3.0}
+8CE   e:teid     Miranda Lambert
+
+```
 
 
+As we have learned Spark's machine learning algorithms use the Resilient Distributed Dataset or RDD. The Data Source and Preparator create an RDD that is amenable to processing by the Spark machine learning algorithms.   When we use a default engine, this PredictionIO code is already provided for us.
 
+####The Algorithm
+We also need to specify what machine learning algorithm to use and also any parameters that algorithm requires. In the recommendation system we built in the previous chapter we used the default Alternating Least Squares, algorithm--an algorithm we will learn more about in the next chapter. The default Scala code also specified several parameters used by that algorithm. PredictionIO provides a number of key machine learning algorithms. You can use these as-is, modify them, or build an algorithm from scratch. We will learn more about each of these options in subsequent chapters. A PredictionIO machine learning engine may use multiple algorithms and combine the results. 
 
-* HBase
-* ElasticSearch
-* Spark
+Once we define the data source and preparator, and one or more algorithms we can train the engine, building what is called a predictive model.
 
-    - Spark core
-    - save some details (RDD for ex.,) for later
-    - or maybe bite the bullet and give a few page intro to Spark. - 
-    
-* Zookeeper - synchronization
-* General Architecture
-* Why PredictionIO?
+The algorithm also specfies how to handle prediction requests. Typically the algorithm received a query, processes that query and produces a list of predicted results. 
+
+####Serving
+Once the algorithm produces a list of results, the serving component converts these to JSON and returns the final predicted results. If there are multiple algorithms, the serving component combines the results of these algorithms. 
+
+####Evaluation
+The Evaluation component of an engine evaluates the accuracy of the engine by comparing the actual results to the predicted results (EXPAND) 
+
 
 [^F1][http://www.meetup.com/skillsmatter/events/142358142/](http://www.meetup.com/skillsmatter/events/142358142/)
